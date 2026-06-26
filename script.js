@@ -43,11 +43,11 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-// Contact Form Handling
+// Contact Form Handling with Formspree
 const contactForm = document.getElementById('contactForm');
 const formMessage = document.getElementById('formMessage');
 
-contactForm.addEventListener('submit', (e) => {
+contactForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
     const name = document.getElementById('name').value;
@@ -65,21 +65,36 @@ contactForm.addEventListener('submit', (e) => {
         return;
     }
     
-    // Simulate form submission (replace with actual backend logic)
+    // Show loading message
     showFormMessage('กำลังส่งข้อความ...', 'success');
     
-    setTimeout(() => {
-        // Here you would typically send data to your backend
-        console.log('Form submitted:', { name, email, message });
+    const formData = new FormData(contactForm);
+    
+    try {
+        const response = await fetch(contactForm.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
         
-        showFormMessage('ส่งข้อความสำเร็จ! ขอบคุณที่ติดต่อ', 'success');
-        contactForm.reset();
-        
-        // Clear message after 5 seconds
-        setTimeout(() => {
-            formMessage.style.display = 'none';
-        }, 5000);
-    }, 1500);
+        if (response.ok) {
+            showFormMessage('ส่งข้อความสำเร็จ! ขอบคุณที่ติดต่อ', 'success');
+            contactForm.reset();
+            
+            // Clear message after 5 seconds
+            setTimeout(() => {
+                formMessage.style.display = 'none';
+            }, 5000);
+        } else {
+            const data = await response.json();
+            showFormMessage('เกิดข้อผิดพลาด: ' + (data.error || 'กรุณาลองใหม่อีกครั้ง'), 'error');
+        }
+    } catch (error) {
+        showFormMessage('เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง', 'error');
+        console.error('Form submission error:', error);
+    }
 });
 
 function isValidEmail(email) {

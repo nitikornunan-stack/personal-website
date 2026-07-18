@@ -758,6 +758,17 @@ body::after {
     opacity: 1;
 }
 
+.source-note a {
+    color: var(--accent-color);
+    opacity: 1;
+    text-decoration: underline;
+    text-decoration-color: rgba(192, 132, 252, 0.4);
+}
+
+.source-note a:hover {
+    text-decoration-color: var(--accent-color);
+}
+
 /* Reference gallery */
 .gallery-grid {
     display: grid;

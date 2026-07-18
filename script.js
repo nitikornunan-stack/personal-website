@@ -207,3 +207,40 @@ document.head.appendChild(glitchStyle);
 // Console easter egg
 console.log('%c🤖 Welcome to Nitikorn Unan\'s website!', 'color: #c084fc; font-size: 20px; font-weight: bold;');
 console.log('%cBuilt with ❤️ and pixel art style', 'color: #00ffff; font-size: 14px;');
+
+// Note: section/bar-chart fade-in & fill animations are pure CSS now
+// (see .reveal / .bar-fill in styles.css) — they no longer depend on
+// JavaScript running at all, so content can never get stuck invisible.
+
+// Animated count-up for the big stat-ring numbers (progressive enhancement —
+// the final number is already in the HTML, so this only makes it prettier).
+const statNumbers = document.querySelectorAll('.stat-ring-number[data-count]');
+
+function animateCount(el) {
+    const target = parseFloat(el.getAttribute('data-count'));
+    const suffix = el.getAttribute('data-suffix') || '';
+    const duration = 1200;
+    const start = performance.now();
+
+    function tick(now) {
+        const progress = Math.min((now - start) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const value = Math.round(target * eased);
+        el.textContent = value + suffix;
+        if (progress < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+}
+
+if ('IntersectionObserver' in window && statNumbers.length) {
+    const countObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                animateCount(entry.target);
+                countObserver.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.4 });
+
+    statNumbers.forEach((el) => countObserver.observe(el));
+}
